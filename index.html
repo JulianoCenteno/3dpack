@@ -50,37 +50,25 @@
       A MAIOR COLEÇÃO DE MODELOS 3D COM <span class="highlight">+150.000</span> ARQUIVOS PRONTOS
     </h1>
 
-   <!-- VSL -->
+   <!-- VSL LOCAL MP4 -->
 <div class="vsl-wrap reveal">
   <div class="vsl-phone">
-
-    <!-- VTURB -->
-    <vturb-smartplayer 
-      id="vid-6a125f66cc76db57e226a5e0"
-      style="
-        display:block;
-        margin:0 auto;
-        width:100%;
-        height:100%;
-        max-width:100%;
-        border-radius:inherit;
-        overflow:hidden;
-      ">
-    </vturb-smartplayer>
-
+    <video
+      id="local-vsl-video"
+      class="local-vsl-video"
+      data-src="videos/vsl.mp4"
+      poster="images/mockup.webp"
+      preload="none"
+      playsinline
+      muted
+      controls
+      width="400"
+      height="711"
+      style="display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;background:#09090b;">
+      Seu navegador não suporta vídeo HTML5.
+    </video>
   </div>
 </div>
-
-<!-- SCRIPT VTURB -->
-<script>
-(function () {
-  const s = document.createElement("script");
-  s.src = "https://scripts.converteai.net/b54edd95-0cf2-4ab3-9bfd-580341f69fa6/players/6a125f66cc76db57e226a5e0/v4/player.js";
-  s.async = true;
-  s.defer = true;
-  document.head.appendChild(s);
-})();
-</script>
 
     <!-- Subtitle -->
     <p class="hero-subtitle reveal">Acesse um acervo completo, organizado por categorias, com milhares de modelos prontos para imprimir.</p>
@@ -845,6 +833,51 @@
     </div>
   </div>
 </div>
+
+<script>
+/* VSL local MP4 ultra leve: carrega e inicia somente quando a seção entra na tela */
+(function () {
+  const video = document.getElementById('local-vsl-video');
+  if (!video) return;
+
+  let loaded = false;
+
+  function loadVideo() {
+    if (loaded) return;
+    const src = video.getAttribute('data-src');
+    if (!src) return;
+    video.src = src;
+    video.load();
+    loaded = true;
+  }
+
+  function safePlay() {
+    loadVideo();
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(function () {
+        // Alguns navegadores bloqueiam autoplay. O usuário ainda pode clicar no play.
+      });
+    }
+  }
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+          safePlay();
+        } else if (loaded && !video.paused) {
+          video.pause();
+        }
+      });
+    }, { threshold: [0, 0.35, 0.6] });
+
+    observer.observe(video);
+  } else {
+    window.addEventListener('load', loadVideo, { once: true });
+  }
+})();
+</script>
 
 <script src="script.js" defer></script>
 </body>
