@@ -305,10 +305,10 @@
     });
   }
 
-  /* ---- INIT COM ATRASO REAL ---- */
+  /* ---- INIT COM ATRASO EQUILIBRADO ---- */
   function initCritical() {
-    // Este arquivo já é carregado com atraso pelo index.
-    // Aqui entram apenas interações essenciais, sem cálculos pesados.
+    // Este arquivo já entra 3s depois do DOM para priorizar a VSL.
+    // Mantém primeiro as interações essenciais, sem cálculos pesados.
     initTimer();
     initCTAButtons();
     initModal();
@@ -332,10 +332,11 @@
   function boot() {
     initCritical();
 
-    // Etapas separadas para não travar a renderização inicial nem competir com a VSL.
-    setTimeout(function () { idle(initDeferredStageOne); }, 600);
-    setTimeout(function () { idle(initDeferredStageTwo); }, 1200);
-    setTimeout(function () { idle(initDeferredStageThree); }, 2200);
+    // Como o arquivo já foi atrasado no index, aqui a liberação é mais rápida.
+    // Isso mantém o site responsivo sem competir com o carregamento inicial da VTurb.
+    setTimeout(function () { idle(initDeferredStageOne); }, 150);
+    setTimeout(function () { idle(initDeferredStageTwo); }, 650);
+    setTimeout(function () { idle(initDeferredStageThree); }, 1600);
   }
 
   if (doc.readyState === 'loading') {

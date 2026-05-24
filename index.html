@@ -833,7 +833,7 @@
   </div>
 </div>
 
-<!-- script.js atrasado para priorizar a VSL e o primeiro carregamento -->
+<!-- script.js atrasado: VTurb entra primeiro; interações da página entram após 3s -->
 <script>
 (function(){
   function loadSiteJS(){
@@ -841,13 +841,22 @@
     window.__pack3dScriptLoaded = true;
     var s = document.createElement('script');
     s.src = 'script.js';
-    s.defer = true;
+    s.async = true;
     document.body.appendChild(s);
   }
-  window.addEventListener('load', function(){
-    setTimeout(loadSiteJS, 4200);
-  }, {once:true});
-  setTimeout(loadSiteJS, 7000);
+
+  function scheduleSiteJS(){
+    setTimeout(loadSiteJS, 3000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleSiteJS, {once:true});
+  } else {
+    scheduleSiteJS();
+  }
+
+  // Segurança: se algum navegador atrasar eventos, ainda assim carrega sem passar de 4s.
+  setTimeout(loadSiteJS, 4000);
 })();
 </script>
 </body>
