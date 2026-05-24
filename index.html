@@ -833,51 +833,22 @@
   </div>
 </div>
 
+<!-- script.js atrasado para priorizar a VSL e o primeiro carregamento -->
 <script>
-/* VSL local MP4 ultra leve: carrega e inicia somente quando a seção entra na tela */
-(function () {
-  const video = document.getElementById('local-vsl-video');
-  if (!video) return;
-
-  let loaded = false;
-
-  function loadVideo() {
-    if (loaded) return;
-    const src = video.getAttribute('data-src');
-    if (!src) return;
-    video.src = src;
-    video.load();
-    loaded = true;
+(function(){
+  function loadSiteJS(){
+    if (window.__pack3dScriptLoaded) return;
+    window.__pack3dScriptLoaded = true;
+    var s = document.createElement('script');
+    s.src = 'script.js';
+    s.defer = true;
+    document.body.appendChild(s);
   }
-
-  function safePlay() {
-    loadVideo();
-    const playPromise = video.play();
-    if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise.catch(function () {
-        // Alguns navegadores bloqueiam autoplay. O usuário ainda pode clicar no play.
-      });
-    }
-  }
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
-          safePlay();
-        } else if (loaded && !video.paused) {
-          video.pause();
-        }
-      });
-    }, { threshold: [0, 0.35, 0.6] });
-
-    observer.observe(video);
-  } else {
-    window.addEventListener('load', loadVideo, { once: true });
-  }
+  window.addEventListener('load', function(){
+    setTimeout(loadSiteJS, 4200);
+  }, {once:true});
+  setTimeout(loadSiteJS, 7000);
 })();
 </script>
-
-<script src="script.js" defer></script>
 </body>
 </html>

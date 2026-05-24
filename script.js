@@ -305,37 +305,42 @@
     });
   }
 
-  /* ---- INIT ---- */
+  /* ---- INIT COM ATRASO REAL ---- */
   function initCritical() {
+    // Este arquivo já é carregado com atraso pelo index.
+    // Aqui entram apenas interações essenciais, sem cálculos pesados.
     initTimer();
     initCTAButtons();
     initModal();
     initScrollReveal();
   }
 
-  function initDeferred() {
+  function initDeferredStageOne() {
     initFAQ();
-    initMobileBar();
-    initCarouselsLazy();
-    initNotifications();
     initSmoothScroll();
+    initMobileBar();
   }
 
-  function releaseDeferredAfterVSL() {
-    // A VSL é prioridade: funções abaixo da primeira dobra só iniciam após 4s.
-    // Isso evita disputar rede/CPU com o carregamento inicial da VTurb.
-    setTimeout(function () {
-      idle(initDeferred);
-    }, 4000);
+  function initDeferredStageTwo() {
+    initCarouselsLazy();
+  }
+
+  function initDeferredStageThree() {
+    initNotifications();
+  }
+
+  function boot() {
+    initCritical();
+
+    // Etapas separadas para não travar a renderização inicial nem competir com a VSL.
+    setTimeout(function () { idle(initDeferredStageOne); }, 600);
+    setTimeout(function () { idle(initDeferredStageTwo); }, 1200);
+    setTimeout(function () { idle(initDeferredStageThree); }, 2200);
   }
 
   if (doc.readyState === 'loading') {
-    doc.addEventListener('DOMContentLoaded', function () {
-      initCritical();
-      releaseDeferredAfterVSL();
-    }, { once: true });
+    doc.addEventListener('DOMContentLoaded', boot, { once: true });
   } else {
-    initCritical();
-    releaseDeferredAfterVSL();
+    boot();
   }
 })();
