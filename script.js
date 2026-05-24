@@ -1,24 +1,30 @@
 /* ============================================================
    PACK 3D — script.js
-   Projeto estático puro | GitHub + Vercel ready
+   Otimizado sem quebrar interações | GitHub + Vercel ready
    ============================================================ */
-
 (function () {
   'use strict';
 
+  var doc = document;
+  var win = window;
+  var raf = win.requestAnimationFrame || function (cb) { return setTimeout(cb, 16); };
+  var idle = win.requestIdleCallback || function (cb) { return setTimeout(function () { cb({ didTimeout: false, timeRemaining: function () { return 1; } }); }, 250); };
+
+  function $(selector, root) { return (root || doc).querySelector(selector); }
+  function $all(selector, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(selector)); }
+
   /* ---- COUNTDOWN TIMER ---- */
   function initTimer() {
-    var el = document.getElementById('timer-count');
+    var el = doc.getElementById('timer-count');
     if (!el) return;
+
     var key = 'pack3d_timer_end';
-    var stored = sessionStorage.getItem(key);
-    var end;
-    if (stored) {
-      end = parseInt(stored, 10);
-    } else {
-      end = Date.now() + 16 * 60 * 1000; // 16 minutos
-      sessionStorage.setItem(key, end);
+    var end = parseInt(sessionStorage.getItem(key) || '0', 10);
+    if (!end || end < Date.now()) {
+      end = Date.now() + 16 * 60 * 1000;
+      sessionStorage.setItem(key, String(end));
     }
+
     function tick() {
       var diff = Math.max(0, end - Date.now());
       var m = Math.floor(diff / 60000);
@@ -29,23 +35,134 @@
     tick();
   }
 
+  /* ---- CTA BUTTONS ---- */
+  function initCTAButtons() {
+    doc.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('[data-checkout]');
+      if (!btn) return;
+      var url = btn.getAttribute('data-checkout') || '#checkout';
+      win.location.href = url;
+    });
+  }
+
+  /* ---- POPUP MODAL (Plano Básico) ---- */
+  function initModal() {
+    var overlay = doc.getElementById('modal-overlay');
+    var btnBasic = doc.getElementById('btn-basic');
+    if (!overlay || !btnBasic) return;
+
+    var btnClose = doc.getElementById('modal-close');
+    var btnConfirm = doc.getElementById('modal-confirm');
+    var btnUpgrade = doc.getElementById('modal-upgrade');
+    var pricing = doc.getElementById('pricing');
+
+    function openModal() {
+      overlay.classList.add('open');
+      doc.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      overlay.classList.remove('open');
+      doc.body.style.overflow = '';
+    }
+
+    btnBasic.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openModal();
+    });
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+    if (btnConfirm) btnConfirm.addEventListener('click', function () { win.location.href = '#checkout-basic'; });
+    if (btnUpgrade) btnUpgrade.addEventListener('click', function () {
+      closeModal();
+      if (pricing) pricing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+  }
+
+  /* ---- SCROLL REVEAL ---- */
+  function initScrollReveal() {
+    var els = $all('.reveal, .reveal-left, .reveal-right');
+    if (!els.length) return;
+
+    if (!('IntersectionObserver' in win)) {
+      els.forEach(function (el) { el.classList.add('visible'); });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('visible');
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -35px 0px' });
+
+    els.forEach(function (el) { observer.observe(el); });
+  }
+
+  /* ---- FAQ ACCORDION ---- */
+  function initFAQ() {
+    var list = $('.faq-list');
+    if (!list) return;
+
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.faq-question');
+      if (!btn) return;
+      var item = btn.closest('.faq-item');
+      if (!item) return;
+      var isOpen = item.classList.contains('open');
+      $all('.faq-item', list).forEach(function (i) {
+        i.classList.remove('open');
+        var b = $('.faq-question', i);
+        if (b) b.setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  /* ---- MOBILE STICKY BAR ---- */
+  function initMobileBar() {
+    var bar = doc.getElementById('mobile-bar');
+    if (!bar) return;
+    var shown = false;
+    var ticking = false;
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      raf(function () {
+        if (!shown && win.scrollY > 300) {
+          bar.classList.add('visible');
+          shown = true;
+        }
+        ticking = false;
+      });
+    }
+    win.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
   /* ---- CAROUSEL ---- */
-  function initCarousel(wrapId, trackId, prevId, nextId, slidesPerView) {
-    var wrap = document.getElementById(wrapId);
-    if (!wrap) return;
-    var track = document.getElementById(trackId);
-    if (!track) return;
-    var prevBtn = document.getElementById(prevId);
-    var nextBtn = document.getElementById(nextId);
+  function initCarousel(wrapId, trackId, prevId, nextId) {
+    var wrap = doc.getElementById(wrapId);
+    var track = doc.getElementById(trackId);
+    if (!wrap || !track) return;
+
+    var prevBtn = doc.getElementById(prevId);
+    var nextBtn = doc.getElementById(nextId);
     var slides = track.querySelectorAll('.carousel-slide, .testimonial-slide');
     var total = slides.length;
     var current = 0;
-    var perView = slidesPerView || 1;
     var startX = 0;
     var isDragging = false;
+    var resizeTimer = null;
 
     function getPerView() {
-      var w = window.innerWidth;
+      var w = win.innerWidth;
       if (wrapId === 'categories-carousel') {
         if (w >= 768) return 3;
         if (w >= 640) return 2;
@@ -59,225 +176,166 @@
       return 1;
     }
 
-    function maxIndex() {
-      return Math.max(0, total - getPerView());
-    }
+    function maxIndex() { return Math.max(0, total - getPerView()); }
 
     function goTo(idx) {
-      perView = getPerView();
       current = Math.max(0, Math.min(idx, maxIndex()));
-      var slideWidth = 100 / perView;
-      var offset = -(current * slideWidth);
-      track.style.transform = 'translateX(' + offset + '%)';
+      var offset = -(current * (100 / getPerView()));
+      track.style.transform = 'translate3d(' + offset + '%,0,0)';
     }
 
     if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
     if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); });
 
-    // Touch/swipe
-    var trackEl = wrap;
-    trackEl.addEventListener('touchstart', function (e) {
+    wrap.addEventListener('touchstart', function (e) {
       startX = e.touches[0].clientX;
       isDragging = true;
     }, { passive: true });
-    trackEl.addEventListener('touchend', function (e) {
+
+    wrap.addEventListener('touchend', function (e) {
       if (!isDragging) return;
       var diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 40) {
-        goTo(diff > 0 ? current + 1 : current - 1);
-      }
+      if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1);
       isDragging = false;
     }, { passive: true });
 
-    // Mouse drag
-    trackEl.addEventListener('mousedown', function (e) {
+    wrap.addEventListener('mousedown', function (e) {
       startX = e.clientX;
       isDragging = true;
     });
-    document.addEventListener('mouseup', function (e) {
+
+    doc.addEventListener('mouseup', function (e) {
       if (!isDragging) return;
       var diff = startX - e.clientX;
-      if (Math.abs(diff) > 40) {
-        goTo(diff > 0 ? current + 1 : current - 1);
-      }
+      if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1);
       isDragging = false;
     });
 
-    window.addEventListener('resize', function () { goTo(current); });
+    win.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () { goTo(current); }, 120);
+    }, { passive: true });
+
     goTo(0);
   }
 
-  /* ---- FAQ ACCORDION ---- */
-  function initFAQ() {
-    var items = document.querySelectorAll('.faq-item');
-    items.forEach(function (item) {
-      var btn = item.querySelector('.faq-question');
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        var isOpen = item.classList.contains('open');
-        // Close all
-        items.forEach(function (i) { i.classList.remove('open'); });
-        // Toggle current
-        if (!isOpen) item.classList.add('open');
-      });
-    });
-  }
+  function initCarouselsLazy() {
+    function start() {
+      initCarousel('categories-carousel', 'categories-track', 'cat-prev', 'cat-next');
+      initCarousel('testimonials-carousel', 'testimonials-track', 'test-prev', 'test-next');
+    }
 
-  /* ---- MOBILE STICKY BAR ---- */
-  function initMobileBar() {
-    var bar = document.getElementById('mobile-bar');
-    if (!bar) return;
-    var shown = false;
-    window.addEventListener('scroll', function () {
-      if (window.scrollY > 300 && !shown) {
-        bar.classList.add('visible');
-        shown = true;
-      }
-    }, { passive: true });
+    if (!('IntersectionObserver' in win)) {
+      start();
+      return;
+    }
+
+    var targets = [doc.getElementById('categories-carousel'), doc.getElementById('testimonials-carousel')].filter(Boolean);
+    if (!targets.length) return;
+
+    var started = {};
+    var observer = new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var id = entry.target.id;
+        if (started[id]) return;
+        started[id] = true;
+        if (id === 'categories-carousel') initCarousel('categories-carousel', 'categories-track', 'cat-prev', 'cat-next');
+        if (id === 'testimonials-carousel') initCarousel('testimonials-carousel', 'testimonials-track', 'test-prev', 'test-next');
+        obs.unobserve(entry.target);
+      });
+    }, { rootMargin: '350px 0px' });
+
+    targets.forEach(function (el) { observer.observe(el); });
   }
 
   /* ---- NOTIFICATION BALLOON ---- */
   var notifications = [
-    { name: 'Beatriz Nogueira', city: 'Goiânia, GO', product: 'MEGA PACK PREMIUM' },
-    { name: 'Carlos Mendes', city: 'São Paulo, SP', product: 'MEGA PACK PREMIUM' },
-    { name: 'Ana Paula Lima', city: 'Belo Horizonte, MG', product: 'MEGA PACK PREMIUM' },
-    { name: 'Rafael Souza', city: 'Curitiba, PR', product: 'MEGA PACK PREMIUM' },
-    { name: 'Fernanda Costa', city: 'Fortaleza, CE', product: 'MEGA PACK PREMIUM' },
-    { name: 'Lucas Oliveira', city: 'Recife, PE', product: 'MEGA PACK PREMIUM' },
-    { name: 'Juliana Santos', city: 'Salvador, BA', product: 'MEGA PACK PREMIUM' },
-    { name: 'Marcos Ferreira', city: 'Porto Alegre, RS', product: 'MEGA PACK PREMIUM' },
-    { name: 'Camila Rocha', city: 'Brasília, DF', product: 'MEGA PACK PREMIUM' },
-    { name: 'Diego Alves', city: 'Manaus, AM', product: 'MEGA PACK PREMIUM' },
+    ['Beatriz Nogueira', 'Goiânia, GO', 'MEGA PACK PREMIUM'],
+    ['Carlos Mendes', 'São Paulo, SP', 'MEGA PACK PREMIUM'],
+    ['Ana Paula Lima', 'Belo Horizonte, MG', 'MEGA PACK PREMIUM'],
+    ['Rafael Souza', 'Curitiba, PR', 'MEGA PACK PREMIUM'],
+    ['Fernanda Costa', 'Fortaleza, CE', 'MEGA PACK PREMIUM'],
+    ['Lucas Oliveira', 'Recife, PE', 'MEGA PACK PREMIUM'],
+    ['Juliana Santos', 'Salvador, BA', 'MEGA PACK PREMIUM'],
+    ['Marcos Ferreira', 'Porto Alegre, RS', 'MEGA PACK PREMIUM'],
+    ['Camila Rocha', 'Brasília, DF', 'MEGA PACK PREMIUM'],
+    ['Diego Alves', 'Manaus, AM', 'MEGA PACK PREMIUM']
   ];
   var notifIndex = 0;
 
   function showNotification() {
-    var balloon = document.getElementById('notif-balloon');
+    var balloon = doc.getElementById('notif-balloon');
     if (!balloon) return;
     var n = notifications[notifIndex % notifications.length];
-    notifIndex++;
+    notifIndex += 1;
 
-    balloon.querySelector('.notif-name').textContent = n.name;
-    balloon.querySelector('.notif-city').textContent = n.city + ' adquiriu o';
-    balloon.querySelector('.notif-product').textContent = n.product;
+    var nameEl = $('.notif-name', balloon);
+    var cityEl = $('.notif-city', balloon);
+    var productEl = $('.notif-product', balloon);
+    if (nameEl) nameEl.textContent = n[0];
+    if (cityEl) cityEl.textContent = n[1] + ' adquiriu o';
+    if (productEl) productEl.textContent = ' ' + n[2];
 
     balloon.classList.add('show');
-    setTimeout(function () {
-      balloon.classList.remove('show');
-    }, 4500);
+    setTimeout(function () { balloon.classList.remove('show'); }, 4500);
   }
 
   function initNotifications() {
-    var balloon = document.getElementById('notif-balloon');
-    if (!balloon) return;
-    // First show after 3s
-    setTimeout(function () {
-      showNotification();
-      // Then every 8-12s
-      setInterval(function () {
+    if (!doc.getElementById('notif-balloon')) return;
+    win.addEventListener('load', function () {
+      setTimeout(function cycle() {
         showNotification();
-      }, 9000 + Math.random() * 3000);
-    }, 3000);
-  }
-
-  /* ---- POPUP MODAL (Plano Básico) ---- */
-  function initModal() {
-    var overlay = document.getElementById('modal-overlay');
-    var btnBasic = document.getElementById('btn-basic');
-    var btnClose = document.getElementById('modal-close');
-    var btnConfirm = document.getElementById('modal-confirm');
-    var btnUpgrade = document.getElementById('modal-upgrade');
-
-    if (!overlay || !btnBasic) return;
-
-    function openModal() {
-      overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal() {
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    btnBasic.addEventListener('click', openModal);
-    if (btnClose) btnClose.addEventListener('click', closeModal);
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay) closeModal();
-    });
-    if (btnConfirm) {
-      btnConfirm.addEventListener('click', function () {
-        // Replace with actual basic plan URL
-        window.location.href = '#checkout-basic';
-      });
-    }
-    if (btnUpgrade) {
-      btnUpgrade.addEventListener('click', function () {
-        closeModal();
-        document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-      });
-    }
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeModal();
-    });
-  }
-
-  /* ---- SCROLL REVEAL ---- */
-  function initScrollReveal() {
-    var els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-    if (!('IntersectionObserver' in window)) {
-      els.forEach(function (el) { el.classList.add('visible'); });
-      return;
-    }
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    els.forEach(function (el) { observer.observe(el); });
-  }
-
-  /* ---- CTA BUTTONS ---- */
-  function initCTAButtons() {
-    // All CTA buttons point to the same checkout URL
-    // Replace '#checkout' with the actual Hotmart/Kiwify URL
-    var checkoutUrl = '#checkout';
-    var ctaBtns = document.querySelectorAll('[data-checkout]');
-    ctaBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var url = btn.getAttribute('data-checkout') || checkoutUrl;
-        window.location.href = url;
-      });
-    });
+        setTimeout(cycle, 9000 + Math.floor(Math.random() * 3000));
+      }, 4500);
+    }, { once: true });
   }
 
   /* ---- SMOOTH SCROLL for anchor links ---- */
   function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-      a.addEventListener('click', function (e) {
-        var target = document.querySelector(a.getAttribute('href'));
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
+    doc.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      var target = doc.querySelector(href);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
 
   /* ---- INIT ---- */
-  document.addEventListener('DOMContentLoaded', function () {
+  function initCritical() {
     initTimer();
-    initCarousel('categories-carousel', 'categories-track', 'cat-prev', 'cat-next');
-    initCarousel('testimonials-carousel', 'testimonials-track', 'test-prev', 'test-next');
-    initFAQ();
-    initMobileBar();
-    initNotifications();
+    initCTAButtons();
     initModal();
     initScrollReveal();
-    initCTAButtons();
-    initSmoothScroll();
-  });
+  }
 
+  function initDeferred() {
+    initFAQ();
+    initMobileBar();
+    initCarouselsLazy();
+    initNotifications();
+    initSmoothScroll();
+  }
+
+  function releaseDeferredAfterVSL() {
+    // A VSL é prioridade: funções abaixo da primeira dobra só iniciam após 4s.
+    // Isso evita disputar rede/CPU com o carregamento inicial da VTurb.
+    setTimeout(function () {
+      idle(initDeferred);
+    }, 4000);
+  }
+
+  if (doc.readyState === 'loading') {
+    doc.addEventListener('DOMContentLoaded', function () {
+      initCritical();
+      releaseDeferredAfterVSL();
+    }, { once: true });
+  } else {
+    initCritical();
+    releaseDeferredAfterVSL();
+  }
 })();

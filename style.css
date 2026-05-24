@@ -276,6 +276,20 @@ h1, h2, h3, h4 { font-family: var(--font-headline); line-height: 1.1; }
   padding: 1.5rem;
 }
 .vsl-placeholder svg { width: 3rem; height: 3rem; opacity: 0.6; }
+.vsl-phone vturb-smartplayer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  background: var(--zinc-950);
+}
+.vsl-phone iframe,
+.vsl-phone video {
+  border-radius: inherit;
+}
+
 
 .hero-subtitle {
   margin-top: 2.5rem;
@@ -392,6 +406,12 @@ h1, h2, h3, h4 { font-family: var(--font-headline); line-height: 1.1; }
 
 /* --- SECTION BASE --- */
 section { padding: 6rem 0; }
+/* Renderização preguiçosa para preservar velocidade abaixo da VSL sem alterar visual */
+.hero ~ section,
+.site-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}
 .section-bg-gray { background: var(--bg-gray); }
 .section-bg-white { background: #fff; }
 .section-bg-dark { background: var(--zinc-950); }
@@ -1314,3 +1334,10 @@ section { padding: 6rem 0; }
 .mt-4 { margin-top: 1rem; }
 .mb-4 { margin-bottom: 1rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+/* --- PERFORMANCE SEGURO: preserva visual e reduz repaints --- */
+.category-card, .bonus-card, .why-card, .plan-card, .testimonial-img, .modal-box, .notif-inner {
+  backface-visibility: hidden;
+}
+.carousel-track, .testimonials-track {
+  transform: translate3d(0,0,0);
+}
