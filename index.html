@@ -114,15 +114,16 @@ svg{display:block}
 .dm-vsl-wrap{
   margin:28px auto 0;
   width:100%;
-  max-width:420px;
+  max-width:320px;
 }
 
 .dm-local-video{
   position:relative;
   width:100%;
-  max-width:400px;
+  max-width:320px;
+  height:569px;
   margin:0 auto;
-  aspect-ratio:16/9;
+  aspect-ratio:auto;
   border-radius:14px;
   overflow:hidden;
   background:#050506;
@@ -203,6 +204,16 @@ svg{display:block}
 
 @media(max-width:480px){
 
+  .dm-vsl-wrap{
+    max-width:330px;
+  }
+
+  .dm-local-video{
+    max-width:330px;
+    height:587px;
+  }
+
+
   .dm-timer{
     padding:12px 18px;
     gap:9px;
@@ -225,6 +236,16 @@ svg{display:block}
 }
 
 @media(max-width:390px){
+
+  .dm-vsl-wrap{
+    max-width:310px;
+  }
+
+  .dm-local-video{
+    max-width:310px;
+    height:551px;
+  }
+
 
   .dm-title{
     font-size:25px;
@@ -2004,14 +2025,25 @@ svg{display:block}
 <!-- VSL LOCAL MP4 -->
 <div class="dm-vsl-wrap">
   <div class="dm-local-video" id="dmLocalVideoBox">
-    <!-- Coloque o arquivo vsl.mp4 na mesma pasta do index.html ou altere o data-src abaixo -->
+    <!--
+      Coloque os arquivos na mesma pasta do index.html:
+      - vsl.mp4
+      - miniatura-vsl.webp
+
+      Se usar outro nome, altere abaixo:
+      data-video-src="./vsl.mp4"
+      poster="./miniatura-vsl.webp"
+    -->
     <video
       id="dmLocalVideo"
       class="dm-local-video-el"
       preload="none"
       playsinline
+      webkit-playsinline
+      poster="./miniatura-vsl.webp"
       controlslist="nodownload noplaybackrate"
-      data-src="images/VSL-3D.mp4">
+      data-video-src="./vsl.mp4">
+      <source data-src="./vsl.mp4" type="video/mp4">
     </video>
 
     <button class="dm-local-play" id="dmLocalPlay" type="button" aria-label="Reproduzir vídeo">
@@ -2824,21 +2856,58 @@ svg{display:block}
     var btn=document.getElementById("dmLocalPlay");
     if(!box||!video||!btn)return;
 
-    function playVideo(){
-      if(!video.getAttribute("src")){
-        video.setAttribute("src",video.getAttribute("data-src")||"./vsl.mp4");
-        video.load();
+    var loaded=false;
+
+    function loadVideo(){
+      if(loaded)return;
+      var videoSrc=video.getAttribute("data-video-src")||"./vsl.mp4";
+      var source=video.querySelector("source");
+
+      if(source && !source.getAttribute("src")){
+        source.setAttribute("src",source.getAttribute("data-src")||videoSrc);
       }
-      video.setAttribute("controls","controls");
-      box.classList.add("dm-playing");
-      var p=video.play();
-      if(p&&p.catch){p.catch(function(){})}
+
+      if(!source && !video.getAttribute("src")){
+        video.setAttribute("src",videoSrc);
+      }
+
+      video.load();
+      loaded=true;
     }
 
-    btn.addEventListener("click",playVideo,{passive:true});
+    function playVideo(){
+      loadVideo();
+      video.setAttribute("controls","controls");
+      box.classList.add("dm-playing");
+
+      var playPromise=video.play();
+      if(playPromise && playPromise.catch){
+        playPromise.catch(function(){
+          /* Se algum navegador bloquear o play automático, os controles já ficam visíveis para o usuário apertar novamente. */
+          video.setAttribute("controls","controls");
+          box.classList.remove("dm-playing");
+        });
+      }
+    }
+
+    btn.addEventListener("click",function(e){
+      e.preventDefault();
+      playVideo();
+    });
+
     video.addEventListener("click",function(){
-      if(video.paused){playVideo()}
-    },{passive:true});
+      if(video.paused){playVideo();}
+    });
+
+    video.addEventListener("play",function(){
+      box.classList.add("dm-playing");
+    });
+
+    video.addEventListener("pause",function(){
+      if(!video.ended){
+        box.classList.remove("dm-playing");
+      }
+    });
   }
 
   function initTracking(){
@@ -2901,4 +2970,3 @@ svg{display:block}
 <!-- BACK REDIRECT OTIMIZADO -->
 
 <!-- FIM BACK REDIRECT -->
-
