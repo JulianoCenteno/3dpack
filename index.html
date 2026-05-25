@@ -26,7 +26,7 @@ svg{display:block}
 .dm-logo{
   display:flex;
   justify-content:center;
-  align-items:center;
+  align-ms:center;
   padding-bottom:20px;
   border-bottom:1px solid #f3f4f6;
 }
@@ -114,58 +114,52 @@ svg{display:block}
 .dm-vsl-wrap{
   margin:28px auto 0;
   width:100%;
-  max-width:320px;
+  max-width:340px;
 }
 
-.dm-local-video{
+.dm-youtube-lite{
   position:relative;
   width:100%;
-  max-width:320px;
-  height:569px;
-  margin:0 auto;
-  aspect-ratio:auto;
-  border-radius:14px;
+  aspect-ratio:9/16;
   overflow:hidden;
+  border-radius:14px;
   background:#050506;
+  cursor:pointer;
   box-shadow:0 12px 26px rgba(0,0,0,.10);
 }
 
-.dm-local-video-el{
+.dm-youtube-lite img{
   width:100%;
   height:100%;
-  display:block;
   object-fit:cover;
-  background:#050506;
+  display:block;
 }
 
-.dm-local-play{
+.dm-youtube-lite iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+
+.dm-youtube-lite button{
   position:absolute;
   left:50%;
   top:50%;
-  width:64px;
-  height:64px;
   transform:translate(-50%,-50%);
+  width:74px;
+  height:74px;
   border:0;
   border-radius:999px;
-  background:rgba(239,68,68,.96);
+  background:#ef4444;
   color:#fff;
+  font-size:30px;
+  cursor:pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 12px 28px rgba(239,68,68,.28);
-  cursor:pointer;
-  z-index:2;
-}
-
-.dm-local-play span{
-  display:block;
-  margin-left:4px;
-  font-size:25px;
-  line-height:1;
-}
-
-.dm-local-video.dm-playing .dm-local-play{
-  display:none;
+  box-shadow:0 12px 28px rgba(239,68,68,.35);
 }
 
 /* ===== MOBILE ===== */
@@ -208,11 +202,6 @@ svg{display:block}
     max-width:330px;
   }
 
-  .dm-local-video{
-    max-width:330px;
-    height:587px;
-  }
-
 
   .dm-timer{
     padding:12px 18px;
@@ -239,11 +228,6 @@ svg{display:block}
 
   .dm-vsl-wrap{
     max-width:310px;
-  }
-
-  .dm-local-video{
-    max-width:310px;
-    height:551px;
   }
 
 
@@ -2022,33 +2006,11 @@ svg{display:block}
     <br/>
 <span>+150.000</span> ARQUIVOS PRONTOS
   </h1>
-<!-- VSL LOCAL MP4 -->
+<!-- VSL YOUTUBE LITE STORIES -->
 <div class="dm-vsl-wrap">
-  <div class="dm-local-video" id="dmLocalVideoBox">
-    <!--
-      Coloque os arquivos na mesma pasta do index.html:
-      - vsl.mp4
-      - miniatura-vsl.webp
-
-      Se usar outro nome, altere abaixo:
-      data-video-src="./vsl.mp4"
-      poster="./miniatura-vsl.webp"
-    -->
-    <video
-      id="dmLocalVideo"
-      class="dm-local-video-el"
-      preload="none"
-      playsinline
-      webkit-playsinline
-      poster="images/Aperte o Play.webp"
-      controlslist="nodownload noplaybackrate"
-      data-video-src=".images/VSL-3D.mp4">
-      <source data-src=".images/VSL-3D.mp4" type="video/mp4">
-    </video>
-
-    <button class="dm-local-play" id="dmLocalPlay" type="button" aria-label="Reproduzir vídeo">
-      <span>▶</span>
-    </button>
+  <div class="dm-youtube-lite" data-video="-p4yLKZPj_8">
+    <img src="https://i.ytimg.com/vi/-p4yLKZPj_8/hqdefault.jpg" alt="Assistir vídeo" loading="lazy" decoding="async"/>
+    <button type="button" aria-label="Assistir vídeo">▶</button>
   </div>
 </div>
 
@@ -2850,66 +2812,6 @@ svg{display:block}
     setTimeout(function(){showSale();setInterval(showSale,9000)},2800);
   }
 
-  function initLocalVideo(){
-    var box=document.getElementById("dmLocalVideoBox");
-    var video=document.getElementById("dmLocalVideo");
-    var btn=document.getElementById("dmLocalPlay");
-    if(!box||!video||!btn)return;
-
-    var loaded=false;
-
-    function loadVideo(){
-      if(loaded)return;
-      var videoSrc=video.getAttribute("data-video-src")||"./vsl.mp4";
-      var source=video.querySelector("source");
-
-      if(source && !source.getAttribute("src")){
-        source.setAttribute("src",source.getAttribute("data-src")||videoSrc);
-      }
-
-      if(!source && !video.getAttribute("src")){
-        video.setAttribute("src",videoSrc);
-      }
-
-      video.load();
-      loaded=true;
-    }
-
-    function playVideo(){
-      loadVideo();
-      video.setAttribute("controls","controls");
-      box.classList.add("dm-playing");
-
-      var playPromise=video.play();
-      if(playPromise && playPromise.catch){
-        playPromise.catch(function(){
-          /* Se algum navegador bloquear o play automático, os controles já ficam visíveis para o usuário apertar novamente. */
-          video.setAttribute("controls","controls");
-          box.classList.remove("dm-playing");
-        });
-      }
-    }
-
-    btn.addEventListener("click",function(e){
-      e.preventDefault();
-      playVideo();
-    });
-
-    video.addEventListener("click",function(){
-      if(video.paused){playVideo();}
-    });
-
-    video.addEventListener("play",function(){
-      box.classList.add("dm-playing");
-    });
-
-    video.addEventListener("pause",function(){
-      if(!video.ended){
-        box.classList.remove("dm-playing");
-      }
-    });
-  }
-
   function initTracking(){
     setTimeout(function(){
       (function(w,d,s,l,i){
@@ -2955,7 +2857,6 @@ svg{display:block}
     initReveal();
     initPopup();
     initFaq();
-    initLocalVideo();
     idle(initCatCarousel,700);
     idle(initProofCarousel,900);
     idle(initSaleToast,1500);
@@ -2966,6 +2867,13 @@ svg{display:block}
     initBackRedirect();
   },{once:true});
 })();
+</script><script>
+document.querySelectorAll('.dm-youtube-lite').forEach(function(el){
+  el.addEventListener('click',function(){
+    var videoId=el.getAttribute('data-video');
+    el.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+videoId+'?autoplay=1&playsinline=1&rel=0" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+  },{once:true});
+});
 </script></body>
 <!-- BACK REDIRECT OTIMIZADO -->
 
