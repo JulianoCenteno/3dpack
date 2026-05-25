@@ -86,60 +86,7 @@ section{display:block}
 svg{display:block}
 </style>
 </head>
-<!-- BACK REDIRECT OTIMIZADO -->
-<script>
-(function(){
-  window.addEventListener("load",function(){
 
-    setTimeout(function(){
-
-      var BACK_REDIRECT_URL =
-        "https://acervodeartes.online/pack-3d-exit/";
-
-      var canRedirect = true;
-      var timer = null;
-
-      try{
-        history.pushState(
-          {dmBackRedirect:true},
-          "",
-          location.href
-        );
-      }catch(e){}
-
-      window.addEventListener("popstate",function(){
-
-        if(!canRedirect)return;
-
-        window.location.replace(
-          BACK_REDIRECT_URL
-        );
-
-      });
-
-      document.addEventListener("click",function(e){
-
-        var target =
-          e.target.closest("a,button");
-
-        if(!target)return;
-
-        canRedirect = false;
-
-        clearTimeout(timer);
-
-        timer = setTimeout(function(){
-          canRedirect = true;
-        },1500);
-
-      },true);
-
-    },3500);
-
-  });
-})();
-</script>
-<!-- FIM BACK REDIRECT -->
 <body>
 <!-- Google Tag Manager (noscript) -->
 <noscript>
