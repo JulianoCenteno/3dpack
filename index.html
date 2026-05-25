@@ -199,43 +199,17 @@ svg{display:block}
 
   <!-- VSL VTURB -->
 <div class="dm-vsl-wrap">
-
   <vturb-smartplayer
     id="vid-6a125f66cc76db57e226a5e0"
     style="display:block;margin:0 auto;width:100%;max-width:400px;">
   </vturb-smartplayer>
-
 </div>
 
 <script>
-(function(){
-
-  function loadVturb(){
-
-    var s=document.createElement("script");
-
-    s.src=
-    "https://scripts.converteai.net/b54edd95-0cf2-4ab3-9bfd-580341f69fa6/players/6a125f66cc76db57e226a5e0/v4/player.js";
-
-    s.async=true;
-    s.defer=true;
-
-    document.head.appendChild(s);
-  }
-
-  if(document.readyState==="complete"){
-    setTimeout(loadVturb,120);
-  }else{
-    window.addEventListener(
-      "load",
-      function(){
-        setTimeout(loadVturb,120);
-      },
-      {once:true}
-    );
-  }
-
-})();
+var s=document.createElement("script");
+s.src="https://scripts.converteai.net/b54edd95-0cf2-4ab3-9bfd-580341f69fa6/players/6a125f66cc76db57e226a5e0/v4/player.js";
+s.async=true;
+document.head.appendChild(s);
 </script>
 
 </section>
