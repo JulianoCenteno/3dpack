@@ -1,11 +1,8 @@
-/* PACK 3D - CSS consolidado para GitHub + Vercel
-   Mantém o visual original dos blocos Elementor e remove dependência WordPress. */
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:#fff;color:#030712;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-img,svg{max-width:100%}
-a,button{-webkit-tap-highlight-color:transparent}
-button{font-family:inherit}
+
+*{box-sizing:border-box}html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}body{margin:0;background:#fff;color:#030712;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}img,svg{max-width:100%}img{display:block}button,a{-webkit-tap-highlight-color:transparent}button{font-family:inherit}section{position:relative}.dm-page{width:100%;overflow-x:hidden}.dm-page a{color:inherit}
+
+
+
 .dm-pack-hero{
   background:#fff;
   text-align:center;
@@ -166,6 +163,8 @@ button{font-family:inherit}
     letter-spacing:2px;
   }
 }
+
+
 
 .dm-benefits-section{
   background:#fff;
@@ -331,6 +330,8 @@ button{font-family:inherit}
   }
 }
 
+
+
 .dm-pain-section{
   background:#f5f5f5;
   padding:42px 12px 44px;
@@ -471,6 +472,8 @@ button{font-family:inherit}
   }
 }
 
+
+
 .dm-steps-section{
   background:#f5f5f5;
   padding:24px 12px 20px;
@@ -600,6 +603,8 @@ button{font-family:inherit}
     transition:none;
   }
 }
+
+
 
 .dm-why-section{
   background:#fff;
@@ -740,6 +745,8 @@ button{font-family:inherit}
     transition:none;
   }
 }
+
+
 
 .dm-cat-section{
   background:#fff;
@@ -957,6 +964,8 @@ button{font-family:inherit}
   }
 }
 
+
+
 .dm-compare-section{
   background:#fff;
   padding:24px 4px 30px;
@@ -1121,6 +1130,8 @@ button{font-family:inherit}
   }
 }
 
+
+
 .dm-bonus-section{background:#f5f5f5;padding:28px 8px 44px;text-align:center;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 .dm-bonus-title{margin:0;color:#030712;font-size:22px;line-height:1.12;font-weight:900;text-transform:uppercase;letter-spacing:-.8px;text-shadow:0 3px 0 rgba(0,0,0,.1)}
 .dm-bonus-sub{margin:12px auto 44px;color:#475569;font-size:14px}
@@ -1146,6 +1157,8 @@ button{font-family:inherit}
 @media(prefers-reduced-motion:reduce){
   .dm-reveal{opacity:1;transform:none;transition:none}
 }
+
+
 
 .dm-proof-section{
   background:#fff;
@@ -1329,6 +1342,8 @@ button{font-family:inherit}
   }
 }
 
+
+
 .dm-pricing-section{background:#050506;padding:58px 9px 36px;text-align:center;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 .dm-pricing-title{margin:0;color:#fff;font-size:25px;line-height:1.12;font-weight:900;letter-spacing:-.8px;text-transform:uppercase;text-shadow:0 3px 0 rgba(255,255,255,.12)}
 .dm-pricing-subtitle{margin:18px auto 52px;color:#cbd5e1;font-size:14px;line-height:1.5}
@@ -1383,6 +1398,8 @@ button{font-family:inherit}
 .dm-popup-red{background:#fee2e2;color:#ef4444}
 @media(max-width:430px){.dm-price-main strong{font-size:42px}.dm-premium-list li,.dm-plan-list li{font-size:12.5px}.dm-popup-box{border-radius:24px;padding:22px 18px 18px}.dm-popup-box h2{font-size:19px}.dm-popup-pricebox strong{font-size:38px}.dm-popup-green,.dm-popup-red{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.dm-reveal{opacity:1;transform:none;transition:none}.dm-popup-box{transition:none}}
+
+
 
 .dm-guarantee-section{
   background:#050506;
@@ -1476,6 +1493,8 @@ button{font-family:inherit}
     transition:none;
   }
 }
+
+
 
 .dm-faq-section{
   background:#fff;
@@ -1614,6 +1633,8 @@ button{font-family:inherit}
     transition:none;
   }
 }
+
+
 
 .dm-final-section{
   background:#f7f7f7;
@@ -1790,6 +1811,8 @@ button{font-family:inherit}
     transition:none;
   }
 }
+
+
 
 .dm-sale-toast{
   position:fixed;
