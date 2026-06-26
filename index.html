@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central 3D Lucrativa™ | Maior Central de Modelos 3D Lucrativos</title>
+    
+    <!-- Safe JSON.stringify wrapper to prevent third-party scripts (e.g. UTMIFY/Pixels) from crashing on circular structures or cross-origin security blocks -->
+    <script>
+      (function() {
+        var originalStringify = JSON.stringify;
+        JSON.stringify = function(value, replacer, space) {
+          try {
+            return originalStringify(value, replacer, space);
+          } catch (err) {
+            try {
+              var seen = new WeakSet();
+              return originalStringify(value, function(key, val) {
+                try {
+                  if (typeof val === "object" && val !== null) {
+                    // Detect Window or cross-origin objects safely
+                    try {
+                      if (val === window || val.self === val || val.window === val) {
+                        return "[Window]";
+                      }
+                    } catch (e) {
+                      return "[CrossOriginWindow]";
+                    }
+
+                    if (seen.has(val)) {
+                      return "[Circular]";
+                    }
+                    seen.add(val);
+                  }
+                  if (replacer) {
+                    return replacer(key, val);
+                  }
+                  return val;
+                } catch (propertyError) {
+                  return "[UnserializableProperty]";
+                }
+              }, space);
+            } catch (fallbackError) {
+              return '{"error":"Unserializable object structure"}';
+            }
+          }
+        };
+      })();
+    </script>
+
+    <!-- Preconnect to external resources to accelerate handshake -->
+    <link rel="preconnect" href="https://img.youtube.com">
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="preconnect" href="https://images.converteai.net">
+    <!-- Preload critical Hero Section above-the-fold video thumbnails -->
+    <link rel="preload" href="https://img.youtube.com/vi/-p4yLKZPj_8/hqdefault.jpg" as="image">
+    <link rel="preload" href="https://images.converteai.net/b54edd95-0cf2-4ab3-9bfd-580341f69fa6/players/6a125f66cc76db57e226a5e0/thumbnail.jpg" as="image">
+
+    <!-- UTMIFY Tracking Script Integration -->
+    <script src="js/latest.js" data-utmify-prevent-xcod-sck="" data-utmify-prevent-subids="" async="" defer=""></script>
+
+    <script>
+      window.pixelId = "69ed7349c35ca6ee8350496d";
+      var a = document.createElement("script");
+      a.setAttribute("async", "");
+      a.setAttribute("defer", "");
+      a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+      document.head.appendChild(a);
+    </script><script async="" defer="" src="js/pixel.js"></script>
+    <script type="module" crossorigin="" src="js/main-BMskJCqz.js"></script>
+    <link rel="stylesheet" crossorigin="" href="css/main-CMIiT0Yf.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  
+
+
+</body></html>
